@@ -1,0 +1,92 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "gpuType": "T4",
+      "authorship_tag": "ABX9TyP9YTbmgVSjnHdBLaoVjaGe",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/arunkumar-iitkgp/AI_working/blob/main/imagenet-simple-labels.json\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 15,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "kkG9e3T4G464",
+        "outputId": "7c0277f3-bc99-4b34-8437-4ece8948846e"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Predicted Class Index: 808\n",
+            "The label for index 808 is: sombrero\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "import torchvision\n",
+        "model = torchvision.models.resnet18(weights='DEFAULT')\n",
+        "import torchvision.transforms as transforms\n",
+        "preprocess = transforms.Compose(\n",
+        "    [\n",
+        "        transforms.Resize(256),\n",
+        "        transforms.CenterCrop(224),\n",
+        "        transforms.ToTensor(),\n",
+        "        transforms.Normalize(\n",
+        "            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]\n",
+        "        ),\n",
+        "    ]\n",
+        ")\n",
+        "\n",
+        "from PIL import Image\n",
+        "\n",
+        "# Replace with the actual path to your image file\n",
+        "img = Image.open('DSC_1924.JPG')\n",
+        "img_preprocessed = preprocess(img)\n",
+        "model.eval()\n",
+        "with torch.no_grad():\n",
+        "    outputs = model(img_preprocessed.unsqueeze(0))\n",
+        "_, predicted = torch.max(outputs, 1)\n",
+        "print(f\"Predicted Class Index: {predicted.item()}\")\n",
+        "import json\n",
+        "import urllib.request\n",
+        "\n",
+        "url = \"https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json\"\n",
+        "urllib.request.urlretrieve(url, \"imagenet-simple-labels.json\")\n",
+        "\n",
+        "with open(\"imagenet-simple-labels.json\") as f:\n",
+        "    class_idx = json.load(f)\n",
+        "\n",
+        "predicted_index = predicted.item()\n",
+        "label = class_idx[predicted_index]\n",
+        "print(f\"The label for index {predicted_index} is: {label}\")"
+      ]
+    }
+  ]
+}
